@@ -6,7 +6,7 @@ class Player{
         this.y = y;
         this.color = color;
         this.num = num;
-        if(num == 1){
+        if(this.num == 1){
             this.dir = 'right';
         } else {
             this.dir = 'left';
@@ -18,8 +18,10 @@ class Player{
         this.walkSpd = 0;
         this.radius = 30;
         this.MAXSPEED = 5;
-        this.jumpTimeout;
+        // this.jumpTimeout;
         this.onLand = 0;
+        this.punchDist = 0;
+        this.punchRestrict = false;
     }
 
     draw(context){
@@ -27,10 +29,14 @@ class Player{
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         context.fill();
+        context.stroke();
+        context.rect(this.x, this.y, this.punchDist*7, 5);
+        context.fill();
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.font = "10px Arial";
-        context.fillText(this.name, this.x, this.y-20);
+        context.fillStyle = 'black';
+        context.font = "20px Arial";
+        context.fillText(this.name, this.x, this.y-this.radius-20);
     }
 
     update(context){
@@ -39,7 +45,7 @@ class Player{
             this.jumpSpd -= 0.15;
         }
         if(this.x-this.radius <= 0 || this.x+this.radius >= canvas.width){
-            this.walkSpd *= -1;
+            this.walkSpd = -this.walkSpd;
         }
         if(this.y-this.radius <= 0){
             this.jumpSpd *= -1;
@@ -70,6 +76,16 @@ class Player{
     }
 
     punch(){
+        if(!this.punchRestrict){
+            if(this.dir == 'left'){
+                this.punchDist = -5;
+                this.punchRestrict = true;
+            }
+            if(this.dir == 'right'){
+                this.punchDist = 5;
+                this.punchRestrict = true;
+            }
+        }
 
     }
 
@@ -104,12 +120,15 @@ class Player{
 
 
     walk(){
-        if(this.dir === 'left'){
-            this.walkSpd-= 0.05;
+        if(Math.abs(this.walkSpd) <= this.MAXSPEED){
+            if(this.dir === 'left'){
+                this.walkSpd-= 0.05;
+            }
+            if(this.dir === 'right'){
+                this.walkSpd+= 0.05;
+            }
         }
-        if(this.dir === 'right'){
-            this.walkSpd+= 0.05;
-        }
+
 
     }
 }

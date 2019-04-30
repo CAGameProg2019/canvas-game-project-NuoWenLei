@@ -9,9 +9,11 @@ class Platform{
 
     draw(c){
         c.fillStyle = this.color;
+        c.beginPath();
         c.rect(this.x, this.y, this.width, this.thickness);
         c.fill();
         c.stroke();
+        c.closePath();
     }
     update(c){
         this.draw(c);
