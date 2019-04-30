@@ -37,9 +37,10 @@ function init(){
     player1 = new Player(player1name, canvas.width/3, canvas.height/2, randomColor(), 1);
     // player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, randomColor(), 2);
 
+	platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black'));
+    platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 100, 20, 'red'));
+	platforms.push(new Platform(canvas.width*3/4, canvas.height/1.5, 100, 20, 'red'));
 
-    platforms.push(new Platform(canvas.width/2, canvas.height/2, 100, 20, 'red'));
-    platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black'));
     update();
 
 }
@@ -59,15 +60,46 @@ function update(){
         player1.dir = 'right';
         player1.walk();
     }
+	if(keys.s){
+		if(player1.checkPlatform() != 0){
+			player1.passPlatform(platforms[player1.checkPlatform()]);
+		}
+	}
 
     // platform player interaction
 
     for(let i = 0; i < platforms.length; i++){
-        if(player1.y + player1.radius >= platforms[i].y && player1.x >= platforms[i].x && player1.x <= platforms[i].x + platforms[i].width){
-            player1.land(platforms[i]);
+        if(player1.y + player1.radius >= platforms[i].y && player1.y - player1.radius <= platforms[i].y&& player1.x >= platforms[i].x && player1.x <= platforms[i].x + platforms[i].width && player1.jumpSpd <= 0){
+            player1.land(platforms[i], i);
         }
     }
 
+	//Through platform
+
+
+	//walk off platform
+	for(let i = 0; i < platforms.length; i++){
+        if(player1.x < platforms[i].x || player1.x > platforms[i].x+platforms[i].width){
+			if(player1.onLand == i && player1.onLand != 0 && player1.jumping == false){
+				player1.jumpSpd = -2;
+				player1.jumping = true;
+			}
+
+        }
+    }
+
+	//Walking
+	player1.x += player1.walkSpd;
+	if(!keys.a && !keys.d){
+		if(player1.walkSpd > 0.01){
+			player1.walkSpd -= 0.01;
+		}else if(player1.walkSpd < -0.01){
+			player1.walkSpd += 0.01;
+		}else{
+			player1.walkSpd = 0;
+		}
+
+	}
 
 
 
@@ -99,6 +131,10 @@ window.addEventListener('load', function(){
             keys.a = true;
 
         }
+		if(event.key == 's'){
+            keys.s = true;
+
+        }
     });
     window.addEventListener('keyup', function(event){
         if(event.key == 'w'){
@@ -111,6 +147,10 @@ window.addEventListener('load', function(){
         }
         if(event.key == 'a'){
             keys.a = false;
+
+        }
+		if(event.key == 's'){
+            keys.s = false;
 
         }
     })
