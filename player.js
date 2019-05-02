@@ -11,20 +11,30 @@ class Player{
         } else {
             this.dir = 'left';
         }
+        //jump
         this.jumpSpd = 0;
         this.jumping = true;
-        // this.jumpChance = 2;
         this.jumpRestrict = false;
+        //walk
         this.walkSpd = 0;
+
         this.radius = 30;
         this.MAXSPEED = 5;
-        // this.jumpTimeout;
+        //landing Stuff
+        this.passRestrict = false;
+        //passPlatform
         this.onLand = 0;
+        //punch
         this.punchDist = 0;
         this.punchRestrict = false;
         this.punching = false;
         this.punchSpd = 0;
         this.uDPunch = false;
+        //shoot
+        this.shootRestrict = false;
+        this.shooting = false;
+        this.chargeBulletRad = 0;
+
     }
 
     draw(context){
@@ -33,13 +43,23 @@ class Player{
         context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         context.fill();
         context.stroke();
-        if(this.uDPunch){
+        if(this.uDPunch && this.punchRestrict){
+            context.beginPath();
             context.rect(this.x, this.y-5, 10, this.punchDist);
-        }else{
+            context.fill();
+        }else if(this.punchRestrict){
+            context.beginPath();
             context.rect(this.x, this.y-5, this.punchDist, 10);
+            context.fill();
         }
 
-        context.fill();
+        if(this.shooting){
+            context.beginPath();
+            context.fillStyle = this.random_rgba();
+            context.arc(this.x, this.y, this.chargeBulletRad, 0, Math.PI*2, false);
+            context.fill();
+        }
+
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.fillStyle = 'black';
@@ -125,6 +145,8 @@ class Player{
 
     checkPlatform(){
         return this.onLand;
+
+
     }
 
     passPlatform(platform){
@@ -137,7 +159,16 @@ class Player{
     }
 
     shoot(){
+        if(!this.shootRestrict){
+            this.shooting = true;
+            this.shootRestrict = true;
+        }
+    }
 
+    release(){
+        let bullet = this.chargeBulletRad;
+        this.chargeBulletRad = 0;
+        return bullet;
     }
 
     //
@@ -164,5 +195,10 @@ class Player{
         }
 
 
+    }
+
+    random_rgba() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
     }
 }

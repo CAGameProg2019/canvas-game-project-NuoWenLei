@@ -8,8 +8,19 @@ let player1name;
 let player2;
 let player2name;
 let platforms = [];
+let energy = [];
+let p1bullets = [];
+let p2bullets = [];
+let BULLETMAX = 15;
 let hP1 = 0;
 let hP2 = 0;
+//Shoot Timers
+let p1shootTime;
+let p2shootTime;
+//Charging bullets
+let bullet1 = 0;
+let bullet2 = 0;
+
 
 let colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 		  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
@@ -27,7 +38,8 @@ let keys = {
     s: false,
     a: false,
     d: false,
-	z: false
+	z: false,
+	x: false
 };
 
 let controls = {
@@ -35,12 +47,44 @@ let controls = {
 	k: false,
 	j: false,
 	l: false,
-	n: false
+	n: false,
+	m: false
 };
 
 function randomColor(){
     return colorArray[Math.floor(Math.random()*colorArray.length)];
 }
+
+function p1shootTimer(){
+	p1shootTime = setTimeout(function(){
+		player1.shootRestrict = false;
+		clearTime1();
+	}, 1000);
+}
+
+function clearTime1(){
+	clearTimeout(p1shootTime);
+}
+
+function p2shootTimer(){
+	p2shootTime = setTimeout(function(){
+		player2.shootRestrict = false;
+		clearTime2();
+	}, 1000);
+}
+
+function clearTime2(){
+	clearTimeout(p2shootTime);
+}
+
+function bulletRelease1(rad){
+	p1bullets.push(new Bullet(player1.x, player1.y, rad, player1.dir));
+}
+
+function bulletRelease2(rad){
+	
+}
+
 
 function init(){
     player1name = prompt("player 1's name");
@@ -48,9 +92,9 @@ function init(){
     player1 = new Player(player1name, canvas.width/3, canvas.height/2, randomColor(), 1);
     player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, randomColor(), 2);
 
-	platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black'));
-    platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 200, 20, 'red'));
-	platforms.push(new Platform(canvas.width*3/4, canvas.height/1.5, 200, 20, 'red'));
+	platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
+    platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 200, 20, 'red', true));
+	platforms.push(new Platform(canvas.width*3/4, canvas.height/1.5, 200, 20, 'red', true));
 
     update();
 
@@ -79,6 +123,17 @@ function update(){
 	c.fillText(player2name + ' Radius: ' + Math.round(hP2), canvas.width, 0);
 	}
 
+	for(let i = 0; i < platforms.length; i++){
+        if(player1.y + player1.radius >= platforms[i].y && player1.y - player1.radius <= platforms[i].y&& player1.x >= platforms[i].x && player1.x <= platforms[i].x + platforms[i].width && player1.jumpSpd <= 0){
+            player1.land(platforms[i], i);
+        }
+    }
+	for(let i = 0; i < platforms.length; i++){
+        if(player2.y + player2.radius >= platforms[i].y && player2.y - player2.radius <= platforms[i].y&& player2.x >= platforms[i].x && player2.x <= platforms[i].x + platforms[i].width && player2.jumpSpd <= 0){
+            player2.land(platforms[i], i);
+        }
+    }
+
     if(keys.w){
         player1.jump();
     }
@@ -91,12 +146,23 @@ function update(){
         player1.walk();
     }
 	if(keys.s){
-		if(player1.checkPlatform() != 0){
-			player1.passPlatform(platforms[player1.checkPlatform()]);
+		if(player1.onLand != 0 && platforms[player1.onLand].passable == true){
+
+			player1.passPlatform(platforms[player1.onLand]);
 		}
 	}
 	if(keys.z){
 		player1.punch(keys);
+	}
+	if(keys.x){
+		if(!player1.shootRestrict && !player1.shooting){
+			player1.shoot();
+			p1shootTimer();
+		}else if(player1.shooting && !player1.shootRestrict){
+			player1.shooting = false;
+			bulletRelease1(player1.release());
+			p1shootTimer();
+		}
 	}
 	if(controls.i){
         player2.jump();
@@ -110,26 +176,28 @@ function update(){
         player2.walk();
     }
 	if(controls.k){
-		if(player2.checkPlatform() != 0){
-			player2.passPlatform(platforms[player1.checkPlatform()]);
+		if(player2.onLand != 0 && platforms[player2.onLand].passable == true){
+			player2.passPlatform(platforms[player2.onLand]);
 		}
 	}
 	if(controls.n){
 		player2.punch(controls);
 	}
+	if(controls.m){
+		if(!player2.shootRestrict && !player2.shooting){
+			player2.shoot();
+			p2shootTimer();
+		}else if(player2.shooting && !player2.shootRestrict){
+			player2.shooting = false;
+			bulletRelease2(player2.release());
+			p2shootTimer();
+		}
+
+	}
 
     // platform player interaction
 
-    for(let i = 0; i < platforms.length; i++){
-        if(player1.y + player1.radius >= platforms[i].y && player1.y - player1.radius <= platforms[i].y&& player1.x >= platforms[i].x && player1.x <= platforms[i].x + platforms[i].width && player1.jumpSpd <= 0){
-            player1.land(platforms[i], i);
-        }
-    }
-	for(let i = 0; i < platforms.length; i++){
-        if(player2.y + player2.radius >= platforms[i].y && player2.y - player2.radius <= platforms[i].y&& player2.x >= platforms[i].x && player2.x <= platforms[i].x + platforms[i].width && player2.jumpSpd <= 0){
-            player2.land(platforms[i], i);
-        }
-    }
+
 
 	//Through platform
 
@@ -210,31 +278,36 @@ function update(){
 	//Hitbox and Damage
 
 		//Left and Right Punches
-	if(!player1.uDPunch && player1.dir == 'right' && player1.x + player1.punchDist > player2.x - player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x < player2.x + player2.radius){
+	if(!player1.uDPunch && player1.punchRestrict && player1.dir == 'right' && player1.x + player1.punchDist > player2.x - player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x < player2.x + player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(!player1.uDPunch && player1.dir == 'left' && player1.x + player1.punchDist < player2.x + player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x > player2.x - player2.radius){
+	if(!player1.uDPunch && player1.punchRestrict && player1.dir == 'left' && player1.x + player1.punchDist < player2.x + player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x > player2.x - player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(!player2.uDPunch && player2.dir == 'right' && player2.x + player2.punchDist > player1.x - player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x < player1.x + player1.radius){
+	if(!player2.uDPunch && player2.punchRestrict && player2.dir == 'right' && player2.x + player2.punchDist > player1.x - player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x < player1.x + player1.radius){
 		player1.radius-= 0.1;
 	}
-	if(!player2.uDPunch && player2.dir == 'left' && player2.x + player2.punchDist < player1.x + player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x > player1.x - player1.radius){
+	if(!player2.uDPunch && player2.punchRestrict && player2.dir == 'left' && player2.x + player2.punchDist < player1.x + player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x > player1.x - player1.radius){
 		player1.radius-= 0.1;
 	}
 
 		//Up and Down Punches
-	if(player1.uDPunch && player1.punchSpd > 0 && player1.y + player1.punchDist > player2.y - player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y < player2.y + player2.radius){
+	if(player1.uDPunch && player1.punchRestrict && player1.punchSpd > 0 && player1.y + player1.punchDist > player2.y - player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y < player2.y + player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(player1.uDPunch && player1.punchSpd < 0 && player1.y + player1.punchDist < player2.y + player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y > player2.y - player2.radius){
+	if(player1.uDPunch && player1.punchRestrict && player1.punchSpd < 0 && player1.y + player1.punchDist < player2.y + player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y > player2.y - player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(player2.uDPunch && player2.punchSpd > 0 && player2.y + player2.punchDist > player1.y - player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y < player1.y + player1.radius){
+	if(player2.uDPunch && player2.punchRestrict && player2.punchSpd > 0 && player2.y + player2.punchDist > player1.y - player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y < player1.y + player1.radius){
 		player1.radius-= 0.1;
 	}
-	if(player2.uDPunch && player2.punchSpd < 0 && player2.y + player2.punchDist < player1.y + player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y > player1.y - player1.radius){
+	if(player2.uDPunch && player2.punchRestrict && player2.punchSpd < 0 && player2.y + player2.punchDist < player1.y + player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y > player1.y - player1.radius){
 		player1.radius-= 0.1;
+	}
+
+	//shoot
+	if(player1.shooting && player1.chargeBulletRad < BULLETMAX){
+		player1.chargeBulletRad += 0.1;
 	}
 
 
@@ -273,6 +346,9 @@ window.addEventListener('load', function(){
 		if(event.key == 'z'){
 			keys.z = true;
 		}
+		if(event.key == 'x'){
+			keys.x = true;
+		}
 		if(event.key == 'i'){
             controls.i = true;
 
@@ -291,6 +367,9 @@ window.addEventListener('load', function(){
         }
 		if(event.key == 'n'){
 			controls.n = true;
+		}
+		if(event.key == 'm'){
+			controls.m = true;
 		}
     });
     window.addEventListener('keyup', function(event){
@@ -313,6 +392,9 @@ window.addEventListener('load', function(){
 		if(event.key == 'z'){
 			keys.z = false;
 		}
+		if(event.key == 'x'){
+			keys.x = false;
+		}
 		if(event.key == 'i'){
             controls.i = false;
 
@@ -331,6 +413,9 @@ window.addEventListener('load', function(){
         }
 		if(event.key == 'n'){
 			controls.n = false;
+		}
+		if(event.key == 'm'){
+			controls.m = false;
 		}
     })
 });

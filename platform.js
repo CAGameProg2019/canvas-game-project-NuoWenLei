@@ -1,10 +1,11 @@
 class Platform{
-    constructor(x,y,width,thickness, color){
+    constructor(x,y,width,thickness, color, passable){
         this.x = x;
         this.y = y;
         this.width = width;
         this.thickness = thickness;
         this.color = color;
+        this.passable = passable;
     }
 
     draw(c){
