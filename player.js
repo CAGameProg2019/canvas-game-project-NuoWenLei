@@ -22,6 +22,9 @@ class Player{
         this.onLand = 0;
         this.punchDist = 0;
         this.punchRestrict = false;
+        this.punching = false;
+        this.punchSpd = 0;
+        this.uDPunch = false;
     }
 
     draw(context){
@@ -30,7 +33,12 @@ class Player{
         context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         context.fill();
         context.stroke();
-        context.rect(this.x, this.y, this.punchDist*7, 5);
+        if(this.uDPunch){
+            context.rect(this.x, this.y-5, 10, this.punchDist);
+        }else{
+            context.rect(this.x, this.y-5, this.punchDist, 10);
+        }
+
         context.fill();
         context.textAlign = 'center';
         context.textBaseline = 'middle';
@@ -46,6 +54,7 @@ class Player{
         }
         if(this.x-this.radius <= 0 || this.x+this.radius >= canvas.width){
             this.walkSpd = -this.walkSpd;
+
         }
         if(this.y-this.radius <= 0){
             this.jumpSpd *= -1;
@@ -75,16 +84,41 @@ class Player{
         this.onLand = platformNum;
     }
 
-    punch(){
+    punch(key){
         if(!this.punchRestrict){
             if(this.dir == 'left'){
-                this.punchDist = -5;
+                this.punchSpd = -5;
                 this.punchRestrict = true;
+                this.punching = true;
             }
             if(this.dir == 'right'){
-                this.punchDist = 5;
+                this.punchSpd = 5;
                 this.punchRestrict = true;
+                this.punching = true;
             }
+            if(this.num == 1){
+                if(key.w){
+        			this.punchSpd = -5;
+        			this.uDPunch = true;
+        		}else if(key.s){
+        			this.punchSpd = 5;
+        			this.uDPunch = true;
+        		}else{
+        			this.uDPunch = false;
+        		}
+            }
+            if(this.num == 2){
+                if(key.i){
+        			this.punchSpd = -5;
+        			this.uDPunch = true;
+        		}else if(key.k){
+        			this.punchSpd = 5;
+        			this.uDPunch = true;
+        		}else{
+        			this.uDPunch = false;
+        		}
+            }
+
         }
 
     }

@@ -8,6 +8,8 @@ let player1name;
 let player2;
 let player2name;
 let platforms = [];
+let hP1 = 0;
+let hP2 = 0;
 
 let colorArray = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6',
 		  '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
@@ -56,7 +58,26 @@ function init(){
 
 function update(){
     c.clearRect(0,0,canvas.width,canvas.height);
+	hP1 = player1.radius;
+	hP2 = player2.radius;
+	//Score Board
+	c.fillStyle = "black";
+	c.textAlign = 'left';
+	c.textBaseline = 'top';
+	c.font = "30px Arial";
+	if(hP1 < 5){
+		c.fillText(player1name + ' Radius: ' + Math.round(hP1*10)/10, 0, 0);
+	}else{
+		c.fillText(player1name + ' Radius: ' + Math.round(hP1), 0, 0);
+	}
 
+	c.textAlign = 'right';
+	c.textBaseline = 'top';
+	if(hP2 < 5){
+		c.fillText(player2name + ' Radius: ' + Math.round(hP2*10)/10, canvas.width, 0);
+	}else{
+	c.fillText(player2name + ' Radius: ' + Math.round(hP2), canvas.width, 0);
+	}
 
     if(keys.w){
         player1.jump();
@@ -75,7 +96,7 @@ function update(){
 		}
 	}
 	if(keys.z){
-		player1.punch();
+		player1.punch(keys);
 	}
 	if(controls.i){
         player2.jump();
@@ -92,6 +113,9 @@ function update(){
 		if(player2.checkPlatform() != 0){
 			player2.passPlatform(platforms[player1.checkPlatform()]);
 		}
+	}
+	if(controls.n){
+		player2.punch(controls);
 	}
 
     // platform player interaction
@@ -155,7 +179,63 @@ function update(){
 	}
 
 	//punch
+	if(player1.punchRestrict == true){
+		if(Math.abs(player1.punchDist) < 60 && player1.punching){
+			player1.punchDist += player1.punchSpd;
+		}else{
+			player1.punching = false;
+		}
+		if(!player1.punching && player1.punchRestrict){
+			player1.punchDist -= player1.punchSpd;
+		}
+		if(Math.abs(player1.punchDist) < 1){
+			player1.punchRestrict = false;
+		}
+	}
+	if(player2.punchRestrict == true){
 
+		if(Math.abs(player2.punchDist) < 60 && player2.punching){
+			player2.punchDist += player2.punchSpd;
+		}else{
+			player2.punching = false;
+		}
+		if(!player2.punching && player2.punchRestrict){
+			player2.punchDist -= player2.punchSpd;
+		}
+		if(Math.abs(player2.punchDist) < 1){
+			player2.punchRestrict = false;
+		}
+	}
+
+	//Hitbox and Damage
+
+		//Left and Right Punches
+	if(!player1.uDPunch && player1.dir == 'right' && player1.x + player1.punchDist > player2.x - player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x < player2.x + player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(!player1.uDPunch && player1.dir == 'left' && player1.x + player1.punchDist < player2.x + player2.radius && player1.y+5 > player2.y - player2.radius && player1.y-5 < player2.y + player2.radius && player1.x > player2.x - player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(!player2.uDPunch && player2.dir == 'right' && player2.x + player2.punchDist > player1.x - player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x < player1.x + player1.radius){
+		player1.radius-= 0.1;
+	}
+	if(!player2.uDPunch && player2.dir == 'left' && player2.x + player2.punchDist < player1.x + player1.radius && player2.y+5 > player1.y - player1.radius && player2.y-5 < player1.y + player1.radius && player2.x > player1.x - player1.radius){
+		player1.radius-= 0.1;
+	}
+
+		//Up and Down Punches
+	if(player1.uDPunch && player1.punchSpd > 0 && player1.y + player1.punchDist > player2.y - player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y < player2.y + player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(player1.uDPunch && player1.punchSpd < 0 && player1.y + player1.punchDist < player2.y + player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y > player2.y - player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(player2.uDPunch && player2.punchSpd > 0 && player2.y + player2.punchDist > player1.y - player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y < player1.y + player1.radius){
+		player1.radius-= 0.1;
+	}
+	if(player2.uDPunch && player2.punchSpd < 0 && player2.y + player2.punchDist < player1.y + player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y > player1.y - player1.radius){
+		player1.radius-= 0.1;
+	}
 
 
 
@@ -209,6 +289,9 @@ window.addEventListener('load', function(){
             controls.k = true;
 
         }
+		if(event.key == 'n'){
+			controls.n = true;
+		}
     });
     window.addEventListener('keyup', function(event){
         if(event.key == 'w'){
