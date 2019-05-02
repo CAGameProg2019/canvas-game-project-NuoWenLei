@@ -78,11 +78,27 @@ function clearTime2(){
 }
 
 function bulletRelease1(rad){
-	p1bullets.push(new Bullet(player1.x, player1.y, rad, player1.dir));
+	let dir;
+	if(!keys.w && !keys.s){
+		dir = player1.dir;
+	}else if(keys.w && !keys.s){
+		dir = 'up';
+	}else if(keys.s && !keys.w){
+		dir = 'down';
+	}
+	p1bullets.push(new Bullet(player1.x, player1.y, rad, dir));
 }
 
 function bulletRelease2(rad){
-	
+	let dir;
+	if(!controls.i && !controls.k){
+		dir = player1.dir;
+	}else if(controls.i && !controls.k){
+		dir = 'up';
+	}else if(controls.k && !controls.i){
+		dir = 'down';
+	}
+	p2bullets.push(new Bullet(player2.x, player2.y, rad, dir));
 }
 
 
@@ -161,6 +177,7 @@ function update(){
 		}else if(player1.shooting && !player1.shootRestrict){
 			player1.shooting = false;
 			bulletRelease1(player1.release());
+			player1.shootRestrict = true;
 			p1shootTimer();
 		}
 	}
@@ -190,6 +207,7 @@ function update(){
 		}else if(player2.shooting && !player2.shootRestrict){
 			player2.shooting = false;
 			bulletRelease2(player2.release());
+			player2.shootRestrict = true;
 			p2shootTimer();
 		}
 
@@ -309,6 +327,23 @@ function update(){
 	if(player1.shooting && player1.chargeBulletRad < BULLETMAX){
 		player1.chargeBulletRad += 0.1;
 	}
+	if(player2.shooting && player2.chargeBulletRad < BULLETMAX){
+		player2.chargeBulletRad += 0.1;
+	}
+
+	//bullet hits wall
+	for(let i = 0; i < p1bullets.length; i++){
+		if(p1bullets[i].x <= 0 || p1bullets[i].x >= canvas.width || p1bullets[i].y <= 0 || p1bullets[i].y >= canvas.height){
+			p1bullets.splice(i, 1);
+		}
+	}
+	for(let i = 0; i < p2bullets.length; i++){
+		if(p2bullets[i].x <= 0 || p2bullets[i].x >= canvas.width || p2bullets[i].y <= 0 || p2bullets[i].y >= canvas.height){
+			p2bullets.splice(i, 1);
+		}
+	}
+
+
 
 
 
@@ -318,6 +353,12 @@ function update(){
     for(let i = 0; i < platforms.length; i++){
         platforms[i].update(c);
     }
+	for(let i = 0; i < p1bullets.length; i++){
+		p1bullets[i].update(c);
+	}
+	for(let i = 0; i < p2bullets.length; i++){
+		p2bullets[i].update(c);
+	}
 
     requestAnimationFrame(update);
 }
