@@ -7,8 +7,11 @@ let player1;
 let player1name;
 let player2;
 let player2name;
+let p1Vec;
+let p2Vec;
 let platforms = [];
-let energy = [];
+let p1Energy = [];
+let p2Energy = [];
 let p1bullets = [];
 let p2bullets = [];
 let BULLETMAX = 15;
@@ -92,7 +95,7 @@ function bulletRelease1(rad){
 function bulletRelease2(rad){
 	let dir;
 	if(!controls.i && !controls.k){
-		dir = player1.dir;
+		dir = player2.dir;
 	}else if(controls.i && !controls.k){
 		dir = 'up';
 	}else if(controls.k && !controls.i){
@@ -107,6 +110,8 @@ function init(){
     player2name = prompt("player 2's name");
     player1 = new Player(player1name, canvas.width/3, canvas.height/2, randomColor(), 1);
     player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, randomColor(), 2);
+	p1Vec = new Vector(0,0);
+	p2Vec = new Vector(0,0);
 
 	platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
     platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 200, 20, 'red', true));
@@ -266,7 +271,7 @@ function update(){
 
 	//punch
 	if(player1.punchRestrict == true){
-		if(Math.abs(player1.punchDist) < 60 && player1.punching){
+		if(Math.abs(player1.punchDist) < 80 && player1.punching){
 			player1.punchDist += player1.punchSpd;
 		}else{
 			player1.punching = false;
@@ -280,7 +285,7 @@ function update(){
 	}
 	if(player2.punchRestrict == true){
 
-		if(Math.abs(player2.punchDist) < 60 && player2.punching){
+		if(Math.abs(player2.punchDist) < 80 && player2.punching){
 			player2.punchDist += player2.punchSpd;
 		}else{
 			player2.punching = false;
@@ -326,9 +331,11 @@ function update(){
 	//shoot
 	if(player1.shooting && player1.chargeBulletRad < BULLETMAX){
 		player1.chargeBulletRad += 0.1;
+		player1.radius -= 0.02;
 	}
 	if(player2.shooting && player2.chargeBulletRad < BULLETMAX){
 		player2.chargeBulletRad += 0.1;
+		player2.radius -= 0.02;
 	}
 
 	//bullet hits wall
@@ -343,6 +350,37 @@ function update(){
 		}
 	}
 
+	//bullet hits player
+	for(let i = 0; i < p1bullets.length; i++){
+		if(p1bullets[i].dist(p1bullets[i].x, p1bullets[i].y, player2.x, player2.y) <= p1bullets[i].radius + player2.radius){
+			player2.radius -= p1bullets[i].radius/2;
+
+			p1Energy.push(new Energy(player2.x, player2.y, p1bullets[i].radius/1.5, randomColor()));
+			p1bullets.splice(i, 1);
+		}
+	}
+	for(let i = 0; i < p2bullets.length; i++){
+		if(p2bullets[i].dist(p2bullets[i].x, p2bullets[i].y, player1.x, player1.y) <= p2bullets[i].radius + player1.radius){
+			player1.radius -= p2bullets[i].radius/2;
+			p2Energy.push(new Energy(player1.x, player1.y, p2bullets[i].radius/1.5, randomColor()));
+			p2bullets.splice(i, 1);
+		}
+
+	}
+
+	//Energy take in by player
+	for(let i = 0; i < p1Energy.length; i++){
+		if(p1Energy[i].dist(p1Energy[i].x, p1Energy[i].y, player1.x, player1.y) <= player1.radius + p1Energy[i].radius){
+			player1.radius += p1Energy[i].radius;
+			p1Energy.splice(i,1);
+		}
+	}
+	for(let i = 0; i < p2Energy.length; i++){
+		if(p2Energy[i].dist(p2Energy[i].x, p2Energy[i].y, player2.x, player2.y) <= player2.radius + p2Energy[i].radius){
+			player2.radius += p2Energy[i].radius;
+			p2Energy.splice(i,1);
+		}
+	}
 
 
 
@@ -350,6 +388,10 @@ function update(){
 
     player1.update(c);
 	player2.update(c);
+	p1Vec.x = player1.x;
+	p1Vec.y = player1.y;
+	p2Vec.x = player2.x;
+	p2Vec.y = player2.y;
     for(let i = 0; i < platforms.length; i++){
         platforms[i].update(c);
     }
@@ -358,6 +400,12 @@ function update(){
 	}
 	for(let i = 0; i < p2bullets.length; i++){
 		p2bullets[i].update(c);
+	}
+	for(let i = 0; i < p1Energy.length; i++){
+		p1Energy[i].update(c, p1Vec);
+	}
+	for(let i = 0; i < p2Energy.length; i++){
+		p2Energy[i].update(c, p2Vec);
 	}
 
     requestAnimationFrame(update);
