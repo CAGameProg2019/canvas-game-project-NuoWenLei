@@ -43,9 +43,17 @@ class Player{
         context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         context.fill();
         context.stroke();
-        if(this.uDPunch && this.punchRestrict){
+        if(this.uDPunch && this.punchRestrict && this.jumping){
             context.beginPath();
             context.rect(this.x, this.y-5, 10, this.punchDist);
+            context.fill();
+        }else if(this.punchRestrict && this.uDPunch && !this.jumping && this.dir == 'right'){
+            context.beginPath();
+            context.rect(this.x, this.y+this.radius-10, this.punchDist, 10);
+            context.fill();
+        }else if(this.punchRestrict && this.uDPunch && !this.jumping && this.dir == 'left'){
+            context.beginPath();
+            context.rect(this.x, this.y+this.radius-10, -this.punchDist, 10);
             context.fill();
         }else if(this.punchRestrict){
             context.beginPath();

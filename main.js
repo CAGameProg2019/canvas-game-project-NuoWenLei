@@ -3,6 +3,14 @@ let c = canvas.getContext('2d');
 canvas.width = window.innerWidth - 20;
 canvas.height = window.innerHeight - 20;
 
+//game stages
+let gameStage = 1;
+
+//gameStage 2
+let energySpread = [];
+let inPlace = 0;
+
+//gameStage 1
 let player1;
 let player1name;
 let player2;
@@ -104,7 +112,165 @@ function bulletRelease2(rad){
 	p2bullets.push(new Bullet(player2.x, player2.y, rad, dir));
 }
 
+//gameStage 2
+function p1WScene(){
 
+
+	p1Energy = [];
+	for(let i = 0; i < 8; i++){
+		p1Energy.push(new Energy(player2.x, player2.y, 5, randomColor()));
+	}
+	energySpread.push(new Vector(100,100));
+	energySpread.push(new Vector(-100, 100));
+	energySpread.push(new Vector(-100, -100));
+	energySpread.push(new Vector(100, -100));
+	energySpread.push(new Vector(-140.7, 0));
+	energySpread.push(new Vector(140.7, 0));
+	energySpread.push(new Vector(0, 140.7));
+	energySpread.push(new Vector(0, -140.7));
+	for(let i = 0; i< p1Energy.length; i++){
+		energySpread[i].x += p1Energy[i].x;
+		energySpread[i].y += p1Energy[i].y;
+	}
+
+	p1ReScene();
+
+
+
+}
+
+function p1ReScene(){
+	c.clearRect(0,0,canvas.width, canvas.height);
+
+
+	if(inPlace < 8){
+		for(let i = 0; i< p1Energy.length; i++){
+			if(p1Energy[i].x != energySpread[i].x || p1Energy[i].y != energySpread[i].y){
+				p1Energy[i].update(c, energySpread[i]);
+				if(energySpread[i].dist(energySpread[i].x, energySpread[i].y, p1Energy[i].x, p1Energy[i].y) <= p1Energy[i].radius){
+					inPlace++;
+				}
+			}
+
+		}
+
+	}
+	player1.draw(c);
+	if(inPlace >= 8){
+		for(let i = 0; i< p1Energy.length; i++){
+			p1Energy[i].update(c, p1Vec);
+			if(p1Energy[i].dist(p1Energy[i].x, p1Energy[i].y, player1.x, player1.y) <= p1Energy[i].radius + player1.radius){
+				player1.radius+=5;
+				p1Energy.splice(i,1);
+			}
+		}
+	}
+
+	if(p1Energy.length == 0){
+		gameStage = 3;
+	}
+
+
+
+
+
+
+	if(gameStage == 2){
+		requestAnimationFrame(p1ReScene);
+	}
+}
+
+function p2WScene(){
+	p2Energy = [];
+	for(let i = 0; i < 8; i++){
+		p2Energy.push(new Energy(player1.x, player1.y, 5, randomColor()));
+	}
+	energySpread.push(new Vector(100,100));
+	energySpread.push(new Vector(-100, 100));
+	energySpread.push(new Vector(-100, -100));
+	energySpread.push(new Vector(100, -100));
+	energySpread.push(new Vector(-140.7, 0));
+	energySpread.push(new Vector(140.7, 0));
+	energySpread.push(new Vector(0, 140.7));
+	energySpread.push(new Vector(0, -140.7));
+	for(let i = 0; i< p2Energy.length; i++){
+		energySpread[i].x += p2Energy[i].x;
+		energySpread[i].y += p2Energy[i].y;
+	}
+
+	p2ReScene();
+
+
+
+
+}
+
+function p2ReScene(){
+	c.clearRect(0,0,canvas.width, canvas.height);
+
+
+	if(inPlace < 8){
+		for(let i = 0; i< p2Energy.length; i++){
+			if(p2Energy[i].x != energySpread[i].x || p2Energy[i].y != energySpread[i].y){
+				p2Energy[i].update(c, energySpread[i]);
+				if(energySpread[i].dist(energySpread[i].x, energySpread[i].y, p2Energy[i].x, p2Energy[i].y) <= p2Energy[i].radius){
+					inPlace++;
+				}
+			}
+
+		}
+
+	}
+	player2.draw(c);
+	if(inPlace >= 8){
+		for(let i = 0; i< p2Energy.length; i++){
+			p2Energy[i].update(c, p2Vec);
+			if(p2Energy[i].dist(p2Energy[i].x, p2Energy[i].y, player2.x, player2.y) <= p2Energy[i].radius + player2.radius){
+				player2.radius+=5;
+				p2Energy.splice(i,1);
+			}
+		}
+	}
+
+	if(p2Energy.length == 0){
+		gameStage = 3;
+
+	}
+
+
+
+
+
+
+	if(gameStage == 2){
+		requestAnimationFrame(p2ReScene);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//gameStage 1
 function init(){
     player1name = prompt("player 1's name");
     player2name = prompt("player 2's name");
@@ -315,16 +481,30 @@ function update(){
 	}
 
 		//Up and Down Punches
-	if(player1.uDPunch && player1.punchRestrict && player1.punchSpd > 0 && player1.y + player1.punchDist > player2.y - player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y < player2.y + player2.radius){
+	if(player1.uDPunch && player1.punchRestrict && player1.jumping && player1.punchSpd > 0 && player1.y + player1.punchDist > player2.y - player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y < player2.y + player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(player1.uDPunch && player1.punchRestrict && player1.punchSpd < 0 && player1.y + player1.punchDist < player2.y + player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y > player2.y - player2.radius){
+	if(player1.uDPunch && player1.punchRestrict && player1.jumping && player1.punchSpd < 0 && player1.y + player1.punchDist < player2.y + player2.radius && player1.x > player2.x - player2.radius && player1.x+10 < player2.x + player2.radius && player1.y > player2.y - player2.radius){
 		player2.radius-= 0.1;
 	}
-	if(player2.uDPunch && player2.punchRestrict && player2.punchSpd > 0 && player2.y + player2.punchDist > player1.y - player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y < player1.y + player1.radius){
+	if(player2.uDPunch && player2.punchRestrict && player2.jumping && player2.punchSpd > 0 && player2.y + player2.punchDist > player1.y - player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y < player1.y + player1.radius){
 		player1.radius-= 0.1;
 	}
-	if(player2.uDPunch && player2.punchRestrict && player2.punchSpd < 0 && player2.y + player2.punchDist < player1.y + player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y > player1.y - player1.radius){
+	if(player2.uDPunch && player2.punchRestrict && player2.jumping && player2.punchSpd < 0 && player2.y + player2.punchDist < player1.y + player1.radius && player2.x > player1.x - player1.radius && player2.x+10 < player1.x + player1.radius && player2.y > player1.y - player1.radius){
+		player1.radius-= 0.1;
+	}
+
+		//Low sweeps
+	if(player1.uDPunch && player1.punchRestrict && !player1.jumping && player1.dir == 'right' && player1.x + player1.punchDist > player2.x - player2.radius && player1.y+player1.radius > player2.y - player2.radius && player1.y+player1.radius-10 < player2.y + player2.radius && player1.x < player2.x + player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(player1.uDPunch && player1.punchRestrict && !player1.jumping && player1.dir == 'left' && player1.x + -player1.punchDist < player2.x + player2.radius && player1.y+player1.radius > player2.y - player2.radius && player1.y+player1.radius-10 < player2.y + player2.radius && player1.x > player2.x - player2.radius){
+		player2.radius-= 0.1;
+	}
+	if(player2.uDPunch && player2.punchRestrict && !player2.jumping && player2.dir == 'right' && player2.x + player2.punchDist > player1.x - player1.radius && player2.y+player2.radius > player1.y - player1.radius && player2.y+player1.radius-10 < player1.y + player1.radius && player2.x < player1.x + player1.radius){
+		player1.radius-= 0.1;
+	}
+	if(player2.uDPunch && player2.punchRestrict && !player2.jumping && player2.dir == 'left' && player2.x + -player2.punchDist < player1.x + player1.radius && player2.y+player2.radius > player1.y - player1.radius && player2.y+player1.radius-10 < player1.y + player1.radius && player2.x > player1.x - player1.radius){
 		player1.radius-= 0.1;
 	}
 
@@ -382,7 +562,15 @@ function update(){
 		}
 	}
 
-
+	//Game End
+	if(player1.radius < 10){
+		gameStage = 2;
+		p2WScene();
+	}
+	if(player2.radius < 10){
+		gameStage = 2;
+		p1WScene();
+	}
 
 
 
@@ -407,104 +595,109 @@ function update(){
 	for(let i = 0; i < p2Energy.length; i++){
 		p2Energy[i].update(c, p2Vec);
 	}
+	if(gameStage == 1){
+		requestAnimationFrame(update);
+	}
 
-    requestAnimationFrame(update);
 }
 
 
 
 window.addEventListener('load', function(){
-    init();
-    window.addEventListener('keydown', function(event){
-        if(event.key == 'w'){
-            keys.w = true;
+	if(gameStage == 1){
+		init();
+	    window.addEventListener('keydown', function(event){
+	        if(event.key == 'w'){
+	            keys.w = true;
 
-        }
-        if(event.key == 'd'){
-            keys.d = true;
+	        }
+	        if(event.key == 'd'){
+	            keys.d = true;
 
-        }
-        if(event.key == 'a'){
-            keys.a = true;
+	        }
+	        if(event.key == 'a'){
+	            keys.a = true;
 
-        }
-		if(event.key == 's'){
-            keys.s = true;
+	        }
+			if(event.key == 's'){
+	            keys.s = true;
 
-        }
-		if(event.key == 'z'){
-			keys.z = true;
-		}
-		if(event.key == 'x'){
-			keys.x = true;
-		}
-		if(event.key == 'i'){
-            controls.i = true;
+	        }
+			if(event.key == 'z'){
+				keys.z = true;
+			}
+			if(event.key == 'x'){
+				keys.x = true;
+			}
+			if(event.key == 'i'){
+	            controls.i = true;
 
-        }
-        if(event.key == 'l'){
-            controls.l = true;
+	        }
+	        if(event.key == 'l'){
+	            controls.l = true;
 
-        }
-        if(event.key == 'j'){
-            controls.j = true;
+	        }
+	        if(event.key == 'j'){
+	            controls.j = true;
 
-        }
-		if(event.key == 'k'){
-            controls.k = true;
+	        }
+			if(event.key == 'k'){
+	            controls.k = true;
 
-        }
-		if(event.key == 'n'){
-			controls.n = true;
-		}
-		if(event.key == 'm'){
-			controls.m = true;
-		}
-    });
-    window.addEventListener('keyup', function(event){
-        if(event.key == 'w'){
-            keys.w = false;
+	        }
+			if(event.key == 'n'){
+				controls.n = true;
+			}
+			if(event.key == 'm'){
+				controls.m = true;
+			}
+	    });
+	    window.addEventListener('keyup', function(event){
+	        if(event.key == 'w'){
+	            keys.w = false;
 
-        }
-        if(event.key == 'd'){
-            keys.d = false;
+	        }
+	        if(event.key == 'd'){
+	            keys.d = false;
 
-        }
-        if(event.key == 'a'){
-            keys.a = false;
+	        }
+	        if(event.key == 'a'){
+	            keys.a = false;
 
-        }
-		if(event.key == 's'){
-            keys.s = false;
+	        }
+			if(event.key == 's'){
+	            keys.s = false;
 
-        }
-		if(event.key == 'z'){
-			keys.z = false;
-		}
-		if(event.key == 'x'){
-			keys.x = false;
-		}
-		if(event.key == 'i'){
-            controls.i = false;
+	        }
+			if(event.key == 'z'){
+				keys.z = false;
+			}
+			if(event.key == 'x'){
+				keys.x = false;
+			}
+			if(event.key == 'i'){
+	            controls.i = false;
 
-        }
-        if(event.key == 'l'){
-            controls.l = false;
+	        }
+	        if(event.key == 'l'){
+	            controls.l = false;
 
-        }
-        if(event.key == 'j'){
-            controls.j = false;
+	        }
+	        if(event.key == 'j'){
+	            controls.j = false;
 
-        }
-		if(event.key == 'k'){
-            controls.k = false;
+	        }
+			if(event.key == 'k'){
+	            controls.k = false;
 
-        }
-		if(event.key == 'n'){
-			controls.n = false;
-		}
-		if(event.key == 'm'){
-			controls.m = false;
-		}
-    })
+	        }
+			if(event.key == 'n'){
+				controls.n = false;
+			}
+			if(event.key == 'm'){
+				controls.m = false;
+			}
+	    })
+	}
+
 });
