@@ -3,8 +3,30 @@ let c = canvas.getContext('2d');
 canvas.width = window.innerWidth - 20;
 canvas.height = window.innerHeight - 20;
 
-//game stages
-let gameStage = 1;
+//common
+let gameStage = 0;
+let mpos = new Vector(0,0);
+let mouseState = {
+	down: false
+}
+
+//gameStage 4
+let backButton4 = new Button(canvas.width/6, canvas.height/6, "Back", 30, 'black');
+let colorButtons = [];
+
+
+
+//gameStage 0
+let playButton = new Button(canvas.width/2, canvas.height/2, 'Play', 60, 'random');
+let colorSelectButton = new Button(canvas.width*3/4, canvas.height/4, "Color", 40, 'red');
+let p1Color = 'none';
+let p2Color = 'none';
+
+
+//gameStage 3
+let winner = null;
+let backButton3 = new Button(canvas.width/2, canvas.height/2, 'Back', 30, 'black');
+
 
 //gameStage 2
 let energySpread = [];
@@ -112,6 +134,108 @@ function bulletRelease2(rad){
 	p2bullets.push(new Bullet(player2.x, player2.y, rad, dir));
 }
 
+//gameStage 4
+function colorSelect(){
+	c.clearRect(0,0,canvas.width, canvas.height);
+
+
+
+	if(gameStage == 4){
+		requestAnimationFrame(colorSelect);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+//gameStage 0
+function titleScreen(){
+	c.clearRect(0,0,canvas.width, canvas.height);
+
+	if(playButton.dist(playButton.x, playButton.y, mpos.x, mpos.y) <= playButton.radius && mouseState.down){
+		gameStage = 1;
+		init();
+		mouseState.down = false;
+	}
+	if(colorSelectButton.dist(colorSelectButton.x, colorSelectButton.y, mpos.x, mpos.y) <= colorSelectButton.radius && mouseState.down){
+		gameStage = 4;
+		let y = 0;
+		let x = canvas.width/6;
+		for(let i = 0; i < colorArray.length; i++){
+			y += 30;
+			if(y >= canvas.height){
+				y = 30;
+				x += 40;
+			}
+			colorButtons.push(new Button(x,y,'',10,colorArray[i]));
+		}
+		mouseState.down = false;
+	}
+
+	playButton.update(c, mpos);
+	colorSelectButton.update(c, mpos);
+	if(gameStage == 0){
+		requestAnimationFrame(titleScreen);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//gameStage 3
+function endScreen(){
+	c.clearRect(0,0, canvas.width, canvas.height);
+
+	if(backButton3.dist(backButton3.x, backButton3.y, mpos.x, mpos.y) <= backButton3.radius && mouseState.down){
+		gameStage = 0;
+		mouseState.down = false;
+		titleScreen();
+	}
+
+	c.textAlign = 'center';
+	c.textBaseline = 'middle';
+	c.fillStyle = 'black'
+	c.font = "60px Arial";
+	c.fillText("Winner is " + winner, canvas.width/2, (canvas.height/2) + 100);
+
+
+	backButton3.update(c, mpos);
+	if(gameStage == 3){
+		requestAnimationFrame(endScreen);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 //gameStage 2
 function p1WScene(){
 
@@ -167,7 +291,9 @@ function p1ReScene(){
 	}
 
 	if(p1Energy.length == 0){
+		winner = player1name;
 		gameStage = 3;
+		endScreen();
 	}
 
 
@@ -233,8 +359,9 @@ function p2ReScene(){
 	}
 
 	if(p2Energy.length == 0){
+		winner = player2name;
 		gameStage = 3;
-
+		endScreen();
 	}
 
 
@@ -274,8 +401,8 @@ function p2ReScene(){
 function init(){
     player1name = prompt("player 1's name");
     player2name = prompt("player 2's name");
-    player1 = new Player(player1name, canvas.width/3, canvas.height/2, randomColor(), 1);
-    player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, randomColor(), 2);
+    player1 = new Player(player1name, canvas.width/3, canvas.height/2, p2Color, 1);
+    player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, p2Color, 2);
 	p1Vec = new Vector(0,0);
 	p2Vec = new Vector(0,0);
 
@@ -604,25 +731,37 @@ function update(){
 
 
 window.addEventListener('load', function(){
-	if(gameStage == 1){
-		init();
-	    window.addEventListener('keydown', function(event){
-	        if(event.key == 'w'){
-	            keys.w = true;
+	titleScreen();
+	window.addEventListener('mousemove', function(event){
+		mpos.x = event.x;
+		mpos.y = event.y;
+	});
 
-	        }
-	        if(event.key == 'd'){
-	            keys.d = true;
+	window.addEventListener('mousedown', function(){
+		mouseState.down = true;
+	});
 
-	        }
-	        if(event.key == 'a'){
-	            keys.a = true;
+	window.addEventListener('mouseup', function(){
+		mouseState.down = false;
+	});
+	window.addEventListener('keydown', function(event){
+		if(gameStage == 1){
+			if(event.key == 'w'){
+				keys.w = true;
 
-	        }
+			}
+			if(event.key == 'd'){
+				keys.d = true;
+
+			}
+			if(event.key == 'a'){
+				keys.a = true;
+
+			}
 			if(event.key == 's'){
-	            keys.s = true;
+				keys.s = true;
 
-	        }
+			}
 			if(event.key == 'z'){
 				keys.z = true;
 			}
@@ -630,45 +769,48 @@ window.addEventListener('load', function(){
 				keys.x = true;
 			}
 			if(event.key == 'i'){
-	            controls.i = true;
+				controls.i = true;
 
-	        }
-	        if(event.key == 'l'){
-	            controls.l = true;
+			}
+			if(event.key == 'l'){
+				controls.l = true;
 
-	        }
-	        if(event.key == 'j'){
-	            controls.j = true;
+			}
+			if(event.key == 'j'){
+				controls.j = true;
 
-	        }
+			}
 			if(event.key == 'k'){
-	            controls.k = true;
+				controls.k = true;
 
-	        }
+			}
 			if(event.key == 'n'){
 				controls.n = true;
 			}
 			if(event.key == 'm'){
 				controls.m = true;
 			}
-	    });
-	    window.addEventListener('keyup', function(event){
-	        if(event.key == 'w'){
-	            keys.w = false;
+		}
 
-	        }
-	        if(event.key == 'd'){
-	            keys.d = false;
+	});
+	window.addEventListener('keyup', function(event){
+		if(gameStage == 1){
+			if(event.key == 'w'){
+				keys.w = false;
 
-	        }
-	        if(event.key == 'a'){
-	            keys.a = false;
+			}
+			if(event.key == 'd'){
+				keys.d = false;
 
-	        }
+			}
+			if(event.key == 'a'){
+				keys.a = false;
+
+			}
 			if(event.key == 's'){
-	            keys.s = false;
+				keys.s = false;
 
-	        }
+			}
 			if(event.key == 'z'){
 				keys.z = false;
 			}
@@ -676,28 +818,29 @@ window.addEventListener('load', function(){
 				keys.x = false;
 			}
 			if(event.key == 'i'){
-	            controls.i = false;
+				controls.i = false;
 
-	        }
-	        if(event.key == 'l'){
-	            controls.l = false;
+			}
+			if(event.key == 'l'){
+				controls.l = false;
 
-	        }
-	        if(event.key == 'j'){
-	            controls.j = false;
+			}
+			if(event.key == 'j'){
+				controls.j = false;
 
-	        }
+			}
 			if(event.key == 'k'){
-	            controls.k = false;
+				controls.k = false;
 
-	        }
+			}
 			if(event.key == 'n'){
 				controls.n = false;
 			}
 			if(event.key == 'm'){
 				controls.m = false;
 			}
-	    })
-	}
+		}
+
+	})
 
 });

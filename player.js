@@ -4,7 +4,12 @@ class Player{
         this.name = name;
         this.x = x;
         this.y = y;
-        this.color = color;
+        if(color == 'none'){
+            this.color = this.random_rgb();
+        }else{
+            this.color = color;
+        }
+
         this.num = num;
         if(this.num == 1){
             this.dir = 'right';
@@ -39,6 +44,7 @@ class Player{
 
     draw(context){
         context.fillStyle = this.color;
+        context.strokeStyle = this.color;
         context.beginPath();
         context.arc(this.x, this.y, this.radius, 0, Math.PI*2, false);
         context.fill();
@@ -208,5 +214,10 @@ class Player{
     random_rgba() {
     var o = Math.round, r = Math.random, s = 255;
     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+    }
+
+    random_rgb() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + 1 + ')';
     }
 }
