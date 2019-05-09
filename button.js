@@ -6,7 +6,7 @@ class Button extends Vector{
         this.enlargedRad = radius*1.5;
         this.normalRad = radius;
         if(color == 'random'){
-            this.color = this.random_rgba();
+            this.color = this.random_rgb();
         }else{
             this.color = color;
         }

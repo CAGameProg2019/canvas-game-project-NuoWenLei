@@ -11,14 +11,16 @@ let mouseState = {
 }
 
 //gameStage 4
-let backButton4 = new Button(canvas.width/6, canvas.height/6, "Back", 30, 'black');
+let backButton4 = new Button(canvas.width/10, canvas.height/6, "Back", 30, 'black');
 let colorButtons = [];
+let p1Tag = new Tag(canvas.width*5/6, canvas.height/4, 'P1');
+let p2Tag = new Tag(canvas.width*5/6, canvas.height*3/4, 'P2');
 
 
 
 //gameStage 0
 let playButton = new Button(canvas.width/2, canvas.height/2, 'Play', 60, 'random');
-let colorSelectButton = new Button(canvas.width*3/4, canvas.height/4, "Color", 40, 'red');
+let colorSelectButton = new Button(canvas.width*3/4, canvas.height/4, "Color", 40, 'random');
 let p1Color = 'none';
 let p2Color = 'none';
 
@@ -44,7 +46,10 @@ let p1Energy = [];
 let p2Energy = [];
 let p1bullets = [];
 let p2bullets = [];
+let floatEnergy = [];
+let floatEngSpd = 5;
 let BULLETMAX = 15;
+let MAXRAD = 40;
 let hP1 = 0;
 let hP2 = 0;
 //Shoot Timers
@@ -137,9 +142,53 @@ function bulletRelease2(rad){
 //gameStage 4
 function colorSelect(){
 	c.clearRect(0,0,canvas.width, canvas.height);
+	let selected1 = 0;
+	let selected2 = 0;
+	for(let i = 0; i < colorButtons.length; i++){
+		if(p1Tag.dist(p1Tag.x, p1Tag.y, colorButtons[i].x, colorButtons[i].y) <= colorButtons[i].radius && !p1Tag.heldState){
+			p1Color = colorButtons[i].color;
+			selected1++;
+		}
+		if(p2Tag.dist(p2Tag.x, p2Tag.y, colorButtons[i].x, colorButtons[i].y) <= colorButtons[i].radius && !p2Tag.heldState){
+			p2Color = colorButtons[i].color;
+			selected2++;
+		}
 
+	}
 
+	if(selected1 == 0){
+		p1Color = 'none';
+	}
+	if(selected2 == 0){
+		p2Color = 'none';
+	}
 
+	if(backButton4.dist(backButton4.x, backButton4.y, mpos.x, mpos.y) <= backButton4.radius && mouseState.down){
+		mouseState.down = false;
+		gameStage = 0;
+		titleScreen();
+	}
+
+	if(p1Tag.dist(p1Tag.x, p1Tag.y, mpos.x, mpos.y) <= p1Tag.radius && p1Tag.heldState == false && mouseState.down){
+		p1Tag.heldState = true;
+		mouseState.down = false;
+	}else if(p1Tag.heldState && mouseState.down){
+		p1Tag.heldState = false;
+		mouseState.down = false;
+	}
+	if(p2Tag.dist(p2Tag.x, p2Tag.y, mpos.x, mpos.y) <= p2Tag.radius && p2Tag.heldState == false && mouseState.down){
+		p2Tag.heldState = true;
+		mouseState.down = false;
+	}else if(p2Tag.heldState && mouseState.down){
+		p2Tag.heldState = false;
+		mouseState.down = false;
+	}
+	p1Tag.update(c, mpos);
+	p2Tag.update(c, mpos);
+	backButton4.update(c, mpos);
+	for(let i = 0; i < colorButtons.length; i++){
+		colorButtons[i].update(c, mpos);
+	}
 	if(gameStage == 4){
 		requestAnimationFrame(colorSelect);
 	}
@@ -177,6 +226,7 @@ function titleScreen(){
 			colorButtons.push(new Button(x,y,'',10,colorArray[i]));
 		}
 		mouseState.down = false;
+		colorSelect();
 	}
 
 	playButton.update(c, mpos);
@@ -401,7 +451,7 @@ function p2ReScene(){
 function init(){
     player1name = prompt("player 1's name");
     player2name = prompt("player 2's name");
-    player1 = new Player(player1name, canvas.width/3, canvas.height/2, p2Color, 1);
+    player1 = new Player(player1name, canvas.width/3, canvas.height/2, p1Color, 1);
     player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, p2Color, 2);
 	p1Vec = new Vector(0,0);
 	p2Vec = new Vector(0,0);
@@ -689,6 +739,106 @@ function update(){
 		}
 	}
 
+	//Bullet Hits Wall
+	for(let i = 0; i < p1bullets.length; i++){
+		let hitWall = 0;
+		if(p1bullets[i].x + p1bullets[i].radius >= canvas.width){
+			for(let k = 0; k < 20; k++){
+				let xdir = -Math.random()*floatEngSpd;
+				let ydir = floatEngSpd+xdir;
+				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
+			}
+			hitWall++;
+		}else if(p1bullets[i].x - p1bullets[i].radius <= 0){
+			for(let k = 0; k < 20; k++){
+				let xdir = Math.random()*floatEngSpd;
+				let ydir = floatEngSpd-xdir;
+				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
+			}
+			hitWall++;
+		}else if(p1bullets[i].y + p1bullets[i].radius >= canvas.height){
+			for(let k = 0; k < 20; k++){
+				let ydir = -Math.random()*floatEngSpd;
+				let xdir = floatEngSpd+ydir;
+				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
+			}
+			hitWall++;
+		}else if(p1bullets[i].y - p1bullets[i].radius <= 0){
+			for(let k = 0; k < 20; k++){
+				let ydir = Math.random()*floatEngSpd;
+				let xdir = floatEngSpd-ydir;
+				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
+			}
+			hitWall++;
+		}
+		if(hitWall != 0){
+			p1bullets.splice(i, 1);
+		}
+
+	}
+
+	for(let i = 0; i < p2bullets.length; i++){
+		if(p2bullets[i].x + p2bullets[i].radius >= canvas.width){
+			for(let i = 0; i < 20; i++){
+				let xdir = -Math.random()*floatEngSpd;
+				let ydir = floatEngSpd+xdir;
+				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
+			}
+			p2bullets.splice(i, 1);
+		}
+		if(p2bullets[i].x - p2bullets[i].radius <= 0){
+			for(let i = 0; i < 20; i++){
+				let xdir = Math.random()*floatEngSpd;
+				let ydir = floatEngSpd-xdir;
+				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
+			}
+			p2bullets.splice(i, 1);
+		}
+		if(p2bullets[i].y + p2bullets[i].radius >= canvas.height){
+			for(let i = 0; i < 20; i++){
+				let ydir = -Math.random()*floatEngSpd;
+				let xdir = floatEngSpd+ydir;
+				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
+			}
+			p2bullets.splice(i, 1);
+		}
+		if(p2bullets[i].y - p2bullets[i].radius <= 0){
+			for(let i = 0; i < 20; i++){
+				let ydir = Math.random()*floatEngSpd;
+				let xdir = floatEngSpd-ydir;
+				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
+			}
+			p2bullets.splice(i, 1);
+		}
+	}
+
+	//Consume WallEnergy
+	for(let i = 0; i < floatEnergy.length; i++){
+		let consumed = 0;
+		if(floatEnergy[i].dist(floatEnergy[i].x, floatEnergy[i].y, player1.x, player1.y) <= floatEnergy[i].radius + player1.radius){
+			player1.radius += floatEnergy[i].radius/5;
+			consumed++;
+		}
+		if(floatEnergy[i].dist(floatEnergy[i].x, floatEnergy[i].y, player2.x, player2.y) <= floatEnergy[i].radius + player2.radius){
+			player2.radius += floatEnergy[i].radius/5;
+			consumed++;
+		}
+		if(consumed != 0){
+			floatEnergy.splice(i,1);
+		}
+	}
+
+	//Max Radius Players
+	if(player1.radius >= MAXRAD){
+		player1.radius = MAXRAD;
+	}
+	if(player2.radius >= MAXRAD){
+		player2.radius = MAXRAD;
+	}
+
+
+
+
 	//Game End
 	if(player1.radius < 10){
 		gameStage = 2;
@@ -721,6 +871,9 @@ function update(){
 	}
 	for(let i = 0; i < p2Energy.length; i++){
 		p2Energy[i].update(c, p2Vec);
+	}
+	for(let i = 0; i < floatEnergy.length; i++){
+		floatEnergy[i].update(c);
 	}
 	if(gameStage == 1){
 		requestAnimationFrame(update);
