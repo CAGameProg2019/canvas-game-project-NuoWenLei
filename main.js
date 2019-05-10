@@ -10,19 +10,33 @@ let mouseState = {
 	down: false
 }
 
+//gameStage 5
+let backButton5 = new Button(canvas.width/10, canvas.height/6, "Back", 30, 'black');
+let stage1 = [];
+let stage2 = [];
+let stage3 = [];
+let stage4 = [];
+let stage1Button = new Button(canvas.width*3/8, canvas.height*3/8, "1", 30, "black");
+let stage2Button = new Button(canvas.width*3/8, canvas.height*5/8, "2", 30, "black");
+let stage3Button = new Button(canvas.width*5/8, canvas.height*3/8, "3", 30, "black");
+let stage4Button = new Button(canvas.width*5/8, canvas.height*5/8, "4", 30, "black");
+let stageTag = new Tag(canvas.width/2, canvas.height/2, 'Selected');
+
 //gameStage 4
 let backButton4 = new Button(canvas.width/10, canvas.height/6, "Back", 30, 'black');
 let colorButtons = [];
 let p1Tag = new Tag(canvas.width*5/6, canvas.height/4, 'P1');
 let p2Tag = new Tag(canvas.width*5/6, canvas.height*3/4, 'P2');
+let p1Color = 'none';
+let p2Color = 'none';
 
 
 
 //gameStage 0
 let playButton = new Button(canvas.width/2, canvas.height/2, 'Play', 60, 'random');
 let colorSelectButton = new Button(canvas.width*3/4, canvas.height/4, "Color", 40, 'random');
-let p1Color = 'none';
-let p2Color = 'none';
+let stageSelectButton = new Button(canvas.width/4, canvas.height/4, "Stage", 40, 'random');
+
 
 
 //gameStage 3
@@ -139,6 +153,142 @@ function bulletRelease2(rad){
 	p2bullets.push(new Bullet(player2.x, player2.y, rad, dir));
 }
 
+function stageFrame1(){
+	// platforms.push(new Platform(canvas.width/10, canvas.height*2/3, canvas.width/10, 20, 'random', true));
+	// platforms.push(new Platform(canvas.width*8/10, canvas.height*2/3, canvas.width/10, 20, 'random', true));
+	// platforms.push(new Platform(canvas.width*3/8, canvas.height/3, canvas.width/4, 20, 'random', true));
+	stage1.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
+	stage1.push(new Platform(canvas.width/10, canvas.height*2/3, canvas.width/5, 20, 'random', true));
+	stage1.push(new Platform(canvas.width*7/10, canvas.height*2/3, canvas.width/5, 20, 'random', true));
+	stage1.push(new Platform(canvas.width*3/8, canvas.height/3, canvas.width/4, 20, 'random', true));
+}
+
+function stageFrame2(){
+	// platforms.push(new Platform(0, canvas.height*2/3, canvas.width/8, 20, 'random', true));
+	// platforms.push(new Platform(0, canvas.height/3, canvas.width/8, 20, 'random', true));
+	// platforms.push(new Platform(canvas.width*7/8, canvas.height/3, canvas.width/8, 20, 'random', true));
+	// platforms.push(new Platform(canvas.width*7/8, canvas.height*2/3, canvas.width/8, 20, 'random', true));
+	stage2.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
+	stage2.push(new Platform(0, canvas.height*2/3, canvas.width/8, 20, 'random', true));
+	stage2.push(new Platform(0, canvas.height/3, canvas.width/8, 20, 'random', true));
+	stage2.push(new Platform(canvas.width*7/8, canvas.height/3, canvas.width/8, 20, 'random', true));
+	stage2.push(new Platform(canvas.width*7/8, canvas.height*2/3, canvas.width/8, 20, 'random', true));
+}
+
+function stageFrame3(){
+	// platforms.push(new Platform(canvas.width/6, canvas.height*2/3, canvas.width/6, 20, 'random', true));
+	// platforms.push(new Platform(canvas.width*2/3, canvas.height*2/3, canvas.width/6, 20, 'random', true));
+	stage3.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
+	stage3.push(new Platform(canvas.width/6, canvas.height*2/3, canvas.width/6, 20, 'random', true));
+	stage3.push(new Platform(canvas.width*2/3, canvas.height*2/3, canvas.width/6, 20, 'random', true));
+}
+
+function stageFrame4(){
+	stage4.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
+}
+
+
+
+
+
+
+
+
+
+
+//gameStage 5
+function stageSelect(){
+	c.clearRect(0,0,canvas.width,canvas.height);
+
+	//stage1 coord (canvas.width/4, canvas.height/4)
+	c.strokeStyle = 'black';
+	c.rect(canvas.width/4, canvas.height/4, canvas.width/4, canvas.height/4);
+	c.stroke();
+	for(let i = 0; i<stage1.length; i++){
+		c.fillStyle = stage1[i].color;
+		c.strokeStyle = stage1[i].color;
+		c.fillRect(canvas.width/4 + stage1[i].x/4, canvas.height/4 + stage1[i].y/4, stage1[i].width/4, stage1[i].thickness/4);
+	}
+
+	//stage2 coord (canvas.width/4, canvas.height/2)
+	c.strokeStyle = 'black';
+	c.rect(canvas.width/4, canvas.height/2, canvas.width/4, canvas.height/4);
+	c.stroke();
+	for(let i = 0; i<stage2.length; i++){
+		c.fillStyle = stage2[i].color;
+		c.strokeStyle = stage2[i].color;
+		c.fillRect(canvas.width/4 + stage2[i].x/4, canvas.height/2 + stage2[i].y/4, stage2[i].width/4, stage2[i].thickness/4);
+	}
+
+	//stage3 coord (canvas.width/2, canvas.height/4)
+	c.strokeStyle = 'black';
+	c.rect(canvas.width/2, canvas.height/4, canvas.width/4, canvas.height/4);
+	c.stroke();
+	for(let i = 0; i<stage3.length; i++){
+		c.fillStyle = stage3[i].color;
+		c.strokeStyle = stage3[i].color;
+		c.fillRect(canvas.width/2 + stage3[i].x/4, canvas.height/4 + stage3[i].y/4, stage3[i].width/4, stage3[i].thickness/4);
+	}
+
+	//stage4 coord (canvas.width/2, canvas.height/2)
+	c.strokeStyle = 'black';
+	c.rect(canvas.width/2, canvas.height/2, canvas.width/4, canvas.height/4);
+	c.stroke();
+	for(let i = 0; i<stage4.length; i++){
+		c.fillStyle = stage4[i].color;
+		c.strokeStyle = stage4[i].color;
+		c.fillRect(canvas.width/2 + stage4[i].x/4, canvas.height/2 + stage4[i].y/4, stage4[i].width/4, stage4[i].thickness/4);
+	}
+
+	if(stageTag.dist(stageTag.x, stageTag.y, mpos.x, mpos.y) <= stageTag.radius && mouseState.down && !stageTag.heldState){
+		stageTag.heldState = true;
+		mouseState.down = false;
+	}else if(stageTag.heldState && mouseState.down){
+		stageTag.heldState = false;
+		mouseState.down = false;
+	}
+
+	if(backButton5.dist(backButton5.x, backButton5.y, mpos.x, mpos.y) <= backButton5.radius && mouseState.down){
+		mouseState.down = false;
+		gameStage = 0;
+		titleScreen();
+	}
+
+	if(stage1Button.dist(stage1Button.x,stage1Button.y,stageTag.x,stageTag.y) <= stage1Button.radius + stageTag.radius && !stageTag.heldState){
+		platforms = stage1;
+	}
+	if(stage2Button.dist(stage2Button.x,stage2Button.y,stageTag.x,stageTag.y) <= stage2Button.radius + stageTag.radius && !stageTag.heldState){
+		platforms = stage2;
+	}
+	if(stage3Button.dist(stage3Button.x,stage3Button.y,stageTag.x,stageTag.y) <= stage3Button.radius + stageTag.radius && !stageTag.heldState){
+		platforms = stage3;
+	}
+	if(stage4Button.dist(stage4Button.x,stage4Button.y,stageTag.x,stageTag.y) <= stage4Button.radius + stageTag.radius && !stageTag.heldState){
+		platforms = stage4;
+	}
+
+
+	backButton5.update(c,mpos);
+	stageTag.update(c,mpos);
+	stage1Button.update(c, mpos);
+	stage2Button.update(c,mpos);
+	stage3Button.update(c,mpos);
+	stage4Button.update(c,mpos);
+	if(gameStage == 5){
+		requestAnimationFrame(stageSelect);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
 //gameStage 4
 function colorSelect(){
 	c.clearRect(0,0,canvas.width, canvas.height);
@@ -210,8 +360,8 @@ function titleScreen(){
 
 	if(playButton.dist(playButton.x, playButton.y, mpos.x, mpos.y) <= playButton.radius && mouseState.down){
 		gameStage = 1;
-		init();
 		mouseState.down = false;
+		init();
 	}
 	if(colorSelectButton.dist(colorSelectButton.x, colorSelectButton.y, mpos.x, mpos.y) <= colorSelectButton.radius && mouseState.down){
 		gameStage = 4;
@@ -228,9 +378,23 @@ function titleScreen(){
 		mouseState.down = false;
 		colorSelect();
 	}
+	if(stageSelectButton.dist(stageSelectButton.x, stageSelectButton.y, mpos.x, mpos.y) <= stageSelectButton.radius && mouseState.down){
+		gameStage = 5;
+		mouseState.down = false;
+		stage1 = [];
+		stage2 = [];
+		stage3 = [];
+		stage4 = [];
+		stageFrame1();
+		stageFrame2();
+		stageFrame3();
+		stageFrame4();
+		stageSelect();
+	}
 
 	playButton.update(c, mpos);
 	colorSelectButton.update(c, mpos);
+	stageSelectButton.update(c, mpos);
 	if(gameStage == 0){
 		requestAnimationFrame(titleScreen);
 	}
@@ -456,9 +620,11 @@ function init(){
 	p1Vec = new Vector(0,0);
 	p2Vec = new Vector(0,0);
 
-	platforms.push(new Platform(0, canvas.height, canvas.width, 100, 'black', false));
-    platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 200, 20, 'red', true));
-	platforms.push(new Platform(canvas.width*3/4, canvas.height/1.5, 200, 20, 'red', true));
+	if(platforms.length == 0){
+		platforms = stage4;
+	}
+    // platforms.push(new Platform(canvas.width/4, canvas.height/1.5, 200, 20, 'red', true));
+	// platforms.push(new Platform(canvas.width*3/4, canvas.height/1.5, 200, 20, 'red', true));
 
     update();
 
@@ -884,6 +1050,10 @@ function update(){
 
 
 window.addEventListener('load', function(){
+	stageFrame1();
+	stageFrame2();
+	stageFrame3();
+	stageFrame4();
 	titleScreen();
 	window.addEventListener('mousemove', function(event){
 		mpos.x = event.x;
