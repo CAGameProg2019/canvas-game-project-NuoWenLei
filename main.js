@@ -10,6 +10,9 @@ let mouseState = {
 	down: false
 }
 
+//gameStage 6
+let backButton6 = new Button(canvas.width/10, canvas.height/6, 'Back', 30, 'black');
+
 //gameStage 5
 let backButton5 = new Button(canvas.width/10, canvas.height/6, "Back", 30, 'black');
 let stage1 = [];
@@ -20,7 +23,7 @@ let stage1Button = new Button(canvas.width*3/8, canvas.height*3/8, "1", 30, "bla
 let stage2Button = new Button(canvas.width*3/8, canvas.height*5/8, "2", 30, "black");
 let stage3Button = new Button(canvas.width*5/8, canvas.height*3/8, "3", 30, "black");
 let stage4Button = new Button(canvas.width*5/8, canvas.height*5/8, "4", 30, "black");
-let stageTag = new Tag(canvas.width/2, canvas.height/2, 'Selected');
+let stageTag = new Tag(canvas.width/2, canvas.height/10, 'Selected');
 
 //gameStage 4
 let backButton4 = new Button(canvas.width/10, canvas.height/6, "Back", 30, 'black');
@@ -36,6 +39,7 @@ let p2Color = 'none';
 let playButton = new Button(canvas.width/2, canvas.height/2, 'Play', 60, 'random');
 let colorSelectButton = new Button(canvas.width*3/4, canvas.height/4, "Color", 40, 'random');
 let stageSelectButton = new Button(canvas.width/4, canvas.height/4, "Stage", 40, 'random');
+let ruleButton = new Button(canvas.width/4, canvas.height*3/4, "Rules", 40, 'random');
 
 
 
@@ -188,6 +192,64 @@ function stageFrame4(){
 }
 
 
+
+
+
+
+
+
+//gameStage 6
+function rules(){
+	c.clearRect(0,0,canvas.width,canvas.height);
+
+
+	if(backButton6.dist(backButton6.x, backButton6.y, mpos.x, mpos.y) <= backButton6.radius && mouseState.down){
+		gameStage = 0;
+		mouseState.down = false;
+		titleScreen();
+	}
+
+	c.font = '30px Arial';
+	c.textAlign = 'center';
+	c.textBaseline = 'middle';
+	c.fillStyle = 'black';
+	c.strokeStyle = 'black';
+	c.fillText("Player 1 Controls", canvas.width/4, canvas.height/10);
+	c.fillText("Goal", canvas.width/2, canvas.height/10);
+	c.fillText("Player 2 Controls", canvas.width*3/4, canvas.height/10);
+	c.fillText("Fun Fact", canvas.width/2, canvas.height*8/10);
+	c.font = '20px Arial';
+	//P1 Controls
+	c.fillText("A or D = Walking Left or Right", canvas.width/4, canvas.height*2/10);
+	c.fillText("W = Jump, S = Pass Platform", canvas.width/4, canvas.height*3/10);
+	c.fillText("Z = Punch", canvas.width/4, canvas.height*4/10);
+	c.fillText("Z + W = Punch Up", canvas.width/4, canvas.height*5/10);
+	c.fillText("Z + S (in air) = Punch Down", canvas.width/4, canvas.height*6/10);
+	c.fillText("Z + S (on ground) = Low Sweep", canvas.width/4, canvas.height*7/10);
+	c.fillText("X = Charge Bullet, X (after charging) = Shoot Bullet", canvas.width/4, canvas.height*8/10);
+	//P2 controls
+	c.fillText("J or L = Walking Left or Right", canvas.width*3/4, canvas.height*2/10);
+	c.fillText("I = Jump, K = Pass Platform", canvas.width*3/4, canvas.height*3/10);
+	c.fillText("M = Punch", canvas.width*3/4, canvas.height*4/10);
+	c.fillText("M + I = Punch Up", canvas.width*3/4, canvas.height*5/10);
+	c.fillText("M + K (in air) = Punch Down", canvas.width*3/4, canvas.height*6/10);
+	c.fillText("M + K (on ground) = Low Sweep", canvas.width*3/4, canvas.height*7/10);
+	c.fillText("N = Charge Bullet, N (after charging) = Shoot Bullet", canvas.width*3/4, canvas.height*8/10);
+	//Goal
+	c.fillText("Get their energy to Less Than 10!", canvas.width/2, canvas.height*2/10);
+	//fun Fact
+	c.fillText('Bullets use your own energy to charge, so be careful!', canvas.width/2, canvas.height*17/20);
+	c.fillText("If bullets hit the opponent, not only do they do massive damage, they also steal their energy!", canvas.width/2, canvas.height*9/10);
+	c.fillText("If bullets hit the wall, all the energy within it will disperse into small energies!", canvas.width/2, canvas.height*19/20);
+
+
+
+
+	backButton6.update(c,mpos);
+	if(gameStage == 6){
+		requestAnimationFrame(rules);
+	}
+}
 
 
 
@@ -391,10 +453,16 @@ function titleScreen(){
 		stageFrame4();
 		stageSelect();
 	}
+	if(ruleButton.dist(ruleButton.x, ruleButton.y, mpos.x, mpos.y) <= ruleButton.radius && mouseState.down){
+		gameStage = 6;
+		mouseState.down = false;
+		rules();
+	}
 
 	playButton.update(c, mpos);
 	colorSelectButton.update(c, mpos);
 	stageSelectButton.update(c, mpos);
+	ruleButton.update(c,mpos);
 	if(gameStage == 0){
 		requestAnimationFrame(titleScreen);
 	}
@@ -620,6 +688,15 @@ function init(){
 	p1Vec = new Vector(0,0);
 	p2Vec = new Vector(0,0);
 
+
+
+	platforms = [];
+	p1Energy = [];
+	p2Energy = [];
+	p1bullets = [];
+	p2bullets = [];
+	floatEnergy = [];
+
 	if(platforms.length == 0){
 		platforms = stage4;
 	}
@@ -639,19 +716,15 @@ function update(){
 	c.textAlign = 'left';
 	c.textBaseline = 'top';
 	c.font = "30px Arial";
-	if(hP1 < 5){
-		c.fillText(player1name + ' Radius: ' + Math.round(hP1*10)/10, 0, 0);
-	}else{
-		c.fillText(player1name + ' Radius: ' + Math.round(hP1), 0, 0);
-	}
+
+	c.fillText(player1name + ' Energy: ' + Math.round(hP1), 0, 0);
+
 
 	c.textAlign = 'right';
 	c.textBaseline = 'top';
-	if(hP2 < 5){
-		c.fillText(player2name + ' Radius: ' + Math.round(hP2*10)/10, canvas.width, 0);
-	}else{
-	c.fillText(player2name + ' Radius: ' + Math.round(hP2), canvas.width, 0);
-	}
+
+	c.fillText(player2name + ' Energy: ' + Math.round(hP2), canvas.width, 0);
+
 
 	for(let i = 0; i < platforms.length; i++){
         if(player1.y + player1.radius >= platforms[i].y && player1.y - player1.radius <= platforms[i].y&& player1.x >= platforms[i].x && player1.x <= platforms[i].x + platforms[i].width && player1.jumpSpd <= 0){
@@ -911,28 +984,28 @@ function update(){
 		if(p1bullets[i].x + p1bullets[i].radius >= canvas.width){
 			for(let k = 0; k < 20; k++){
 				let xdir = -Math.random()*floatEngSpd;
-				let ydir = floatEngSpd+xdir;
+				let ydir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
 			}
 			hitWall++;
 		}else if(p1bullets[i].x - p1bullets[i].radius <= 0){
 			for(let k = 0; k < 20; k++){
 				let xdir = Math.random()*floatEngSpd;
-				let ydir = floatEngSpd-xdir;
+				let ydir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
 			}
 			hitWall++;
 		}else if(p1bullets[i].y + p1bullets[i].radius >= canvas.height){
 			for(let k = 0; k < 20; k++){
 				let ydir = -Math.random()*floatEngSpd;
-				let xdir = floatEngSpd+ydir;
+				let xdir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
 			}
 			hitWall++;
 		}else if(p1bullets[i].y - p1bullets[i].radius <= 0){
 			for(let k = 0; k < 20; k++){
 				let ydir = Math.random()*floatEngSpd;
-				let xdir = floatEngSpd-ydir;
+				let xdir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p1bullets[i].x, p1bullets[i].y, xdir, ydir, p1bullets[i].radius/5));
 			}
 			hitWall++;
@@ -944,49 +1017,51 @@ function update(){
 	}
 
 	for(let i = 0; i < p2bullets.length; i++){
+		let hitWall = 0;
 		if(p2bullets[i].x + p2bullets[i].radius >= canvas.width){
-			for(let i = 0; i < 20; i++){
+			for(let k = 0; k < 20; k++){
 				let xdir = -Math.random()*floatEngSpd;
-				let ydir = floatEngSpd+xdir;
+				let ydir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
 			}
-			p2bullets.splice(i, 1);
-		}
-		if(p2bullets[i].x - p2bullets[i].radius <= 0){
-			for(let i = 0; i < 20; i++){
+			hitWall++;
+		}else if(p2bullets[i].x - p2bullets[i].radius <= 0){
+			for(let k = 0; k < 20; k++){
 				let xdir = Math.random()*floatEngSpd;
-				let ydir = floatEngSpd-xdir;
+				let ydir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
 			}
-			p2bullets.splice(i, 1);
-		}
-		if(p2bullets[i].y + p2bullets[i].radius >= canvas.height){
-			for(let i = 0; i < 20; i++){
+			hitWall++;
+		}else if(p2bullets[i].y + p2bullets[i].radius >= canvas.height){
+			for(let k = 0; k < 20; k++){
 				let ydir = -Math.random()*floatEngSpd;
-				let xdir = floatEngSpd+ydir;
+				let xdir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
 			}
-			p2bullets.splice(i, 1);
-		}
-		if(p2bullets[i].y - p2bullets[i].radius <= 0){
-			for(let i = 0; i < 20; i++){
+			hitWall++;
+		}else if(p2bullets[i].y - p2bullets[i].radius <= 0){
+			for(let k = 0; k < 20; k++){
 				let ydir = Math.random()*floatEngSpd;
-				let xdir = floatEngSpd-ydir;
+				let xdir = Math.random()*floatEngSpd*2 - floatEngSpd;
 				floatEnergy.push(new WallEnergy(p2bullets[i].x, p2bullets[i].y, xdir, ydir, p2bullets[i].radius/5));
 			}
+			hitWall++;
+		}
+		if(hitWall != 0){
 			p2bullets.splice(i, 1);
 		}
+
 	}
 
 	//Consume WallEnergy
 	for(let i = 0; i < floatEnergy.length; i++){
 		let consumed = 0;
 		if(floatEnergy[i].dist(floatEnergy[i].x, floatEnergy[i].y, player1.x, player1.y) <= floatEnergy[i].radius + player1.radius){
-			player1.radius += floatEnergy[i].radius/5;
+			player1.radius += floatEnergy[i].radius/30;
 			consumed++;
 		}
 		if(floatEnergy[i].dist(floatEnergy[i].x, floatEnergy[i].y, player2.x, player2.y) <= floatEnergy[i].radius + player2.radius){
-			player2.radius += floatEnergy[i].radius/5;
+			player2.radius += floatEnergy[i].radius/30;
 			consumed++;
 		}
 		if(consumed != 0){
