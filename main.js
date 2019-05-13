@@ -683,8 +683,14 @@ function p2ReScene(){
 function init(){
     player1name = prompt("player 1's name");
     player2name = prompt("player 2's name");
-    player1 = new Player(player1name, canvas.width/3, canvas.height/2, p1Color, 1);
-    player2 = new Player(player2name, canvas.width*2/3, canvas.height/2, p2Color, 2);
+	if(player1name == ''){
+		player1name == 'Player 1';
+	}
+	if(player2name == ''){
+		player2name = 'PLayer 2';
+	}
+    player1 = new Player(player1name, canvas.width/4, canvas.height/2, p1Color, 1);
+    player2 = new Player(player2name, canvas.width*3/4, canvas.height/2, p2Color, 2);
 	p1Vec = new Vector(0,0);
 	p2Vec = new Vector(0,0);
 

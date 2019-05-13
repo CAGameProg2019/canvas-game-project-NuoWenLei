@@ -51,8 +51,4 @@ class Vector{
     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + 1 + ')';
     }
 
-
-
-
-
 }
