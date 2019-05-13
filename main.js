@@ -230,11 +230,11 @@ function rules(){
 	//P2 controls
 	c.fillText("J or L = Walking Left or Right", canvas.width*3/4, canvas.height*2/10);
 	c.fillText("I = Jump, K = Pass Platform", canvas.width*3/4, canvas.height*3/10);
-	c.fillText("M = Punch", canvas.width*3/4, canvas.height*4/10);
-	c.fillText("M + I = Punch Up", canvas.width*3/4, canvas.height*5/10);
-	c.fillText("M + K (in air) = Punch Down", canvas.width*3/4, canvas.height*6/10);
-	c.fillText("M + K (on ground) = Low Sweep", canvas.width*3/4, canvas.height*7/10);
-	c.fillText("N = Charge Bullet, N (after charging) = Shoot Bullet", canvas.width*3/4, canvas.height*8/10);
+	c.fillText("N = Punch", canvas.width*3/4, canvas.height*4/10);
+	c.fillText("N + I = Punch Up", canvas.width*3/4, canvas.height*5/10);
+	c.fillText("N + K (in air) = Punch Down", canvas.width*3/4, canvas.height*6/10);
+	c.fillText("N + K (on ground) = Low Sweep", canvas.width*3/4, canvas.height*7/10);
+	c.fillText("M = Charge Bullet, M (after charging) = Shoot Bullet", canvas.width*3/4, canvas.height*8/10);
 	//Goal
 	c.fillText("Get their energy to Less Than 10!", canvas.width/2, canvas.height*2/10);
 	//fun Fact
@@ -967,13 +967,13 @@ function update(){
 	//Energy take in by player
 	for(let i = 0; i < p1Energy.length; i++){
 		if(p1Energy[i].dist(p1Energy[i].x, p1Energy[i].y, player1.x, player1.y) <= player1.radius + p1Energy[i].radius){
-			player1.radius += p1Energy[i].radius;
+			player1.radius += p1Energy[i].radius/2;
 			p1Energy.splice(i,1);
 		}
 	}
 	for(let i = 0; i < p2Energy.length; i++){
 		if(p2Energy[i].dist(p2Energy[i].x, p2Energy[i].y, player2.x, player2.y) <= player2.radius + p2Energy[i].radius){
-			player2.radius += p2Energy[i].radius;
+			player2.radius += p2Energy[i].radius/2;
 			p2Energy.splice(i,1);
 		}
 	}
