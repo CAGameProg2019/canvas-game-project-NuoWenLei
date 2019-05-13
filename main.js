@@ -696,7 +696,6 @@ function init(){
 
 
 
-	platforms = [];
 	p1Energy = [];
 	p2Energy = [];
 	p1bullets = [];
